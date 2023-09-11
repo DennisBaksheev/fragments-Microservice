@@ -38,6 +38,8 @@ Script:
 npm run debug
 This command starts the server with Node's inspector active. Use tools like Chrome DevTools or VSCode's debugger to attach to this process.
 
+5. Testing
+
 Script:
 
 npm test
