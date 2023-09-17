@@ -3,13 +3,17 @@ const express = require('express');
 // version and author from package.json
 const { version, author } = require('../../package.json');
 
+// Import the authentication middleware
+const { authenticate } = require('../auth');
+
 // Create a router that we can use to mount our API
 const router = express.Router();
 
 /**
  * Expose all of our API routes on /v1/* to include an API version.
+ * Protect them all so you have to be authenticated in order to access.
  */
-router.use(`/v1`, require('./api'));
+router.use('/v1', authenticate(), require('./api'));
 
 /**
  * Define a simple health check route. If the server is running
@@ -22,7 +26,6 @@ router.get('/', (req, res) => {
   res.status(200).json({
     status: 'ok',
     author,
-    // Make sure to update this URL to your GitHub profile!
     githubUrl: 'https://github.com/DennisBaksheev/fragments',
     version,
   });
