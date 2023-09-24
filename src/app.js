@@ -8,6 +8,8 @@ const passport = require('passport'); // Already imported in your code
 const authenticate = require('./auth'); // Already imported in your code
 const { author, version } = require('../package.json');
 const logger = require('./logger');
+console.log('Author:', author);
+console.log('Version:', version);
 const pino = require('pino-http')({
   // Use our default logger instance, which is already configured
   logger,
