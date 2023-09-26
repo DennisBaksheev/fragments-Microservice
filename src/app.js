@@ -4,8 +4,12 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
-const passport = require('passport'); // Already imported in your code
-const authenticate = require('./auth'); // Already imported in your code
+const passport = require('passport');
+const basicAuth = require('./auth/basic-auth');
+
+// Import the selected strategy and authenticate function from src/auth/index.js
+const { strategy, authenticate } = require('./auth/cognito');
+
 const { author, version } = require('../package.json');
 const logger = require('./logger');
 console.log('Author:', author);
@@ -31,14 +35,37 @@ app.use(cors());
 app.use(compression());
 
 // Set up our passport authentication middleware
-passport.use(authenticate.strategy());
+passport.use('bearer', strategy());
+passport.use('http', basicAuth.strategy());
 app.use(passport.initialize());
 
-// Commented out the default route as it seems to have been replaced by ./routes
-// app.get('/', (req, res) => {...}
+// Create a router that we can use to mount our API
+const router = express.Router();
+
+/**
+ * Expose all of our API routes on /v1/* to include an API version.
+ * Protect them all so you have to be authenticated in order to access.
+ */
+router.use('/v1', authenticate(), require('./routes/api'));
+
+/**
+ * Define a simple health check route. If the server is running
+ * we'll respond with a 200 OK.  If not, the server isn't healthy.
+ */
+router.get('/', (req, res) => {
+  // Client's shouldn't cache this response (always request it fresh)
+  res.setHeader('Cache-Control', 'no-cache');
+  // Send a 200 'OK' response
+  res.status(200).json({
+    status: 'ok',
+    author,
+    githubUrl: 'https://github.com/DennisBaksheev/fragments',
+    version,
+  });
+});
 
 // Define our routes
-app.use('/', require('./routes'));
+app.use('/', router);
 
 // Add 404 middleware to handle any requests for resources that can't be found
 app.use((req, res) => {
