@@ -3,6 +3,9 @@ const express = require('express');
 // version and author from package.json
 const { version, author } = require('../../package.json');
 
+// Import the response handling functions
+const { createSuccessResponse } = require('../response');
+
 // Import the authentication middleware
 const { authenticate } = require('../auth');
 
@@ -22,13 +25,15 @@ router.use('/v1', authenticate(), require('./api'));
 router.get('/', (req, res) => {
   // Client's shouldn't cache this response (always request it fresh)
   res.setHeader('Cache-Control', 'no-cache');
-  // Send a 200 'OK' response
-  res.status(200).json({
-    status: 'ok',
-    author,
-    githubUrl: 'https://github.com/DennisBaksheev/fragments',
-    version,
-  });
+  // Send a 200 'OK' response using createSuccessResponse function
+  res.status(200).json(
+    createSuccessResponse({
+      status: 'ok',
+      author,
+      githubUrl: 'https://github.com/DennisBaksheev/fragments',
+      version,
+    })
+  );
 });
 
 module.exports = router;
