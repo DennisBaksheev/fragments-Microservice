@@ -5,7 +5,7 @@
   "description": "Fragments back-end API",
   "scripts": {
     "test:watch": "jest -c jest.config.js --runInBand --watch --",
-    "test": "set LOG_LEVEL=debug&& jest -c jest.config.js --runInBand --",
+    "test": "jest -c jest.config.js --runInBand --",
     "coverage": "jest -c jest.config.js --runInBand --coverage",
     "lint": "eslint --config .eslintrc.js \"./src/**/*.js\" \"tests/**/*.js\"",
     "start": "node src/index.js",
