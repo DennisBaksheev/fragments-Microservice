@@ -1,10 +1,10 @@
 const express = require('express');
 
 // version and author from package.json
-const { version, author } = require('../../package.json');
+//const { version, author } = require('../../package.json');
 
 // Import the response handling functions
-const { createSuccessResponse } = require('../response');
+//const { createSuccessResponse } = require('../response');
 
 // Import the authentication middleware
 const { authenticate } = require('../auth');
