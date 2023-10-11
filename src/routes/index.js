@@ -18,22 +18,4 @@ const router = express.Router();
  */
 router.use('/v1', authenticate(), require('./api'));
 
-/**
- * Define a simple health check route. If the server is running
- * we'll respond with a 200 OK.  If not, the server isn't healthy.
- */
-router.get('/', (req, res) => {
-  // Client's shouldn't cache this response (always request it fresh)
-  res.setHeader('Cache-Control', 'no-cache');
-  // Send a 200 'OK' response using createSuccessResponse function
-  res.status(200).json(
-    createSuccessResponse({
-      status: 'ok',
-      author,
-      githubUrl: 'https://github.com/DennisBaksheev/fragments',
-      version,
-    })
-  );
-});
-
 module.exports = router;
