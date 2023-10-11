@@ -7,6 +7,8 @@ describe('Routes Tests', () => {
       const response = await request(app).post('/v1/fragments').send('Test data');
       expect(response.status).toBe(401);
     });
+
+    // Commented out test
     /*
     it('should return 201 Created with valid authentication', async () => {
       // Here, you'll need to provide a valid authentication header or token
@@ -18,6 +20,6 @@ describe('Routes Tests', () => {
         .send('Test data');
       expect(response.status).toBe(201);
     });
-  });
-});
-*/
+    */
+  }); // Closing bracket for the inner describe block
+}); // Closing bracket for the outer describe block
