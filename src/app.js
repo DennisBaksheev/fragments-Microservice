@@ -20,6 +20,20 @@ const pino = require('pino-http')({
 // Import the response handling functions
 const { createSuccessResponse, createErrorResponse } = require('./response');
 
+const contentType = require('content-type');
+const Fragment = require('./Model/fragment');
+
+const rawBody = () => {
+  return express.raw({
+    inflate: true,
+    limit: '5mb',
+    type: (req) => {
+      const { type } = contentType.parse(req);
+      return Fragment.isSupportedType(type);
+    },
+  });
+};
+
 // Create an express app instance we can use to attach middleware and HTTP routes
 const app = express();
 
@@ -43,12 +57,38 @@ app.use(passport.initialize());
 // Create a router that we can use to mount our API
 const router = express.Router();
 
+router.post('/fragments', authenticate(), rawBody(), (req, res) => {
+  if (Buffer.isBuffer(req.body)) {
+    Fragment.setFragment(/*...*/)
+      .then((fragmentId) => {
+        // Assuming the promise resolves with the fragmentId
+        logger.info(`Fragment created successfully with id: ${fragmentId}`);
+
+        // Set the Location header with the URL to GET the fragment
+        const fragmentLocation = process.env.API_URL
+          ? `${process.env.API_URL}/fragments/${fragmentId}`
+          : `http://${req.headers.host}/fragments/${fragmentId}`;
+        res.setHeader('Location', fragmentLocation);
+
+        res.status(201).send('Fragment created');
+      })
+      .catch((err) => {
+        logger.error('Error saving fragment:', err);
+        res.status(500).send('Error saving fragment');
+      });
+  } else {
+    logger.warn('Attempt to create fragment with unsupported content type.');
+    res.status(400).send('Unsupported content type');
+  }
+});
+
 // Expose all of our API routes on /v1/* to include an API version.
 // Protect them all so you have to be authenticated in order to access.
 router.use('/v1', authenticate(), require('./routes/api'));
 
 // Define a simple health check route.
-router.get('/', (req, res) => {
+// Define a simple health check route.
+router.get('/healthcheck', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.status(200).json(
     createSuccessResponse({
