@@ -30,6 +30,7 @@ WORKDIR /app
 # Copy node_modules and other necessary files from the build stage in one layer
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/src /app/src
+COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/tests/.htpasswd /app/tests/.htpasswd
 
 # Start the container by running our server
