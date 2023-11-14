@@ -1,26 +1,23 @@
-const Fragment = require('../../Model/fragment');
+// src/routes/api/get.js
 
-module.exports = {
-  // The existing route logic
-  listFragments: (req, res) => {
-    // TODO: this is just a placeholder to get something working...
-    res.status(200).json({
-      fragments: [],
-    });
-  },
+const { createSuccessResponse } = require('../../response');
+const { Fragment } = require('../../Model/fragment');
+/**
+ * Get a list of fragments for the current user
+ */
+module.exports = async (req, res) => {
+  //const fragment = new Fragment({ ownerId: req.user, type: 'text/plain', size: 0 });
+  let expand = req.query.expand;
 
-  // The new route logic
-  getFragmentById: async (req, res) => {
-    const id = req.params.id;
-    try {
-      const fragmentData = await Fragment.getFragment(id);
-      if (fragmentData) {
-        res.status(200).json(fragmentData);
-      } else {
-        res.status(404).send('Fragment not found.');
-      }
-    } catch (error) {
-      res.status(500).send('Internal server error.');
-    }
-  },
+  if (expand == 1) {
+    const fragmentList = await Fragment.byUser(req.user, true);
+    res.status(200).json(createSuccessResponse({ fragments: fragmentList }));
+  } else {
+    const fragmentList = await Fragment.byUser(req.user);
+    let msg = {
+      fragments: fragmentList,
+    };
+    let message = createSuccessResponse(msg);
+    res.status(200).json(message);
+  }
 };

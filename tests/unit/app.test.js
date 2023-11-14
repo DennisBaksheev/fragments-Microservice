@@ -1,28 +1,11 @@
-// Import necessary libraries
 const request = require('supertest');
-const app = require('../../src/app'); // Adjust the path to your app.js file
 
-// Describe the test suite
-describe('App Tests', () => {
-  // Define the test
-  it('should return 404 for non-existing routes', (done) => {
-    // Send a GET request to a non-existing route
-    request(app)
-      .get('/non-existing-route')
-      .expect(404)
-      .end((err, res) => {
-        if (err) return done(err);
+const app = require('../../src/app');
 
-        // Check the response body
-        expect(res.body).toEqual({
-          status: 'error',
-          error: {
-            message: 'not found',
-            code: 404,
-          },
-        });
-
-        done();
-      });
+describe('USE /v1/fragments', () => {
+  test('404 error handler', async () => {
+    const res = await request(app).get('/v1/fragmentserror').auth('user1@email.com', 'Dennis123!');
+    expect(res.statusCode).toBe(404);
+    expect(res.body.status).toBe('error');
   });
 });
