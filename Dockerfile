@@ -37,3 +37,5 @@ COPY --from=build /app/tests/.htpasswd /app/tests/.htpasswd
 CMD ["npm", "start"]
 
 EXPOSE 8080
+
+

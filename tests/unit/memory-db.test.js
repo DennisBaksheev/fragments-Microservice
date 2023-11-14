@@ -1,41 +1,90 @@
-const MemoryDB = require('../../src/Model/data/memory/memory-db.js');
-const dbInstance = new MemoryDB();
+// Fix this path to point to your project's `memory-db.js` source file
+const MemoryDB = require('../../src/Model/data/memory/memory-db');
 
-describe('Memory Database Fragment Operations', () => {
-  const testId = 'testFragmentId';
-  const testData = { content: 'This is a test fragment.' };
+describe('memory-db', () => {
+  let db;
 
-  it('should write and read a fragment', async () => {
-    await dbInstance.put(testId, 'fragment', testData);
-    const retrievedData = await dbInstance.get(testId, 'fragment');
-    expect(retrievedData).toEqual(testData);
+  // Each test will get its own, empty database instance
+  beforeEach(() => {
+    db = new MemoryDB();
   });
 
-  it('should write and read fragment data', async () => {
-    const testDataContent = 'Test fragment content';
-    await dbInstance.put(testId, 'fragmentData', testDataContent);
-    const retrievedDataContent = await dbInstance.get(testId, 'fragmentData');
-    expect(retrievedDataContent).toEqual(testDataContent);
+  test('put() returns nothing', async () => {
+    const result = await db.put('a', 'b', {});
+    expect(result).toBe(undefined);
   });
 
-  it('should return null for non-existent fragment', async () => {
-    const nonExistentId = 'nonExistentId';
-    const retrievedData = await dbInstance.get(nonExistentId, 'fragment');
-    expect(retrievedData).toBeUndefined();
+  test('get() returns what we put() into the db', async () => {
+    const data = { value: 123 };
+    await db.put('a', 'b', data);
+    const result = await db.get('a', 'b');
+    expect(result).toEqual(data);
   });
 
-  it('should overwrite existing fragment data', async () => {
-    const updatedData = { content: 'Updated test fragment.' };
-    await dbInstance.put(testId, 'fragment', updatedData);
-    const retrievedUpdatedData = await dbInstance.get(testId, 'fragment');
-    expect(retrievedUpdatedData).toEqual(updatedData);
+  test('put() and get() work with Buffers', async () => {
+    const data = Buffer.from([1, 2, 3]);
+    await db.put('a', 'b', data);
+    const result = await db.get('a', 'b');
+    expect(result).toEqual(data);
   });
 
-  // Test for the del method
-  it('should delete a fragment and ensure it no longer exists', async () => {
-    await dbInstance.put(testId, 'fragment', testData);
-    await dbInstance.del(testId, 'fragment');
-    const retrievedDataAfterDelete = await dbInstance.get(testId, 'fragment');
-    expect(retrievedDataAfterDelete).toBeUndefined();
+  test('get() with incorrect secondaryKey returns nothing', async () => {
+    await db.put('a', 'b', 123);
+    const result = await db.get('a', 'c');
+    expect(result).toBe(undefined);
+  });
+
+  test('query() returns all secondaryKey values', async () => {
+    await db.put('a', 'a', { value: 1 });
+    await db.put('a', 'b', { value: 2 });
+    await db.put('a', 'c', { value: 3 });
+
+    const results = await db.query('a');
+    expect(Array.isArray(results)).toBe(true);
+    expect(results).toEqual([{ value: 1 }, { value: 2 }, { value: 3 }]);
+  });
+
+  test('query() returns empty array', async () => {
+    await db.put('b', 'a', { value: 1 });
+    await db.put('b', 'b', { value: 2 });
+    await db.put('b', 'c', { value: 3 });
+
+    const results = await db.query('a');
+    expect(Array.isArray(results)).toBe(true);
+    expect(results).toEqual([]);
+  });
+
+  test('del() removes value put() into db', async () => {
+    await db.put('a', 'a', { value: 1 });
+    expect(await db.get('a', 'a')).toEqual({ value: 1 });
+    await db.del('a', 'a');
+    expect(await db.get('a', 'a')).toBe(undefined);
+  });
+
+  test('del() throws if primaryKey and secondaryKey not in db', () => {
+    expect(() => db.del('a', 'a')).rejects.toThrow();
+  });
+
+  test('get() expects string keys', () => {
+    expect(async () => await db.get()).rejects.toThrow();
+    expect(async () => await db.get(1)).rejects.toThrow();
+    expect(async () => await db.get(1, 1)).rejects.toThrow();
+  });
+
+  test('put() expects string keys', () => {
+    expect(async () => await db.put()).rejects.toThrow();
+    expect(async () => await db.put(1)).rejects.toThrow();
+    expect(async () => await db.put(1, 1)).rejects.toThrow();
+  });
+
+  test('query() expects string key', () => {
+    expect(async () => await db.query()).rejects.toThrow();
+    expect(async () => await db.query(1)).rejects.toThrow();
+  });
+
+  test('del() expects string keys', () => {
+    expect(async () => await db.del()).rejects.toThrow();
+    expect(async () => await db.del(1)).rejects.toThrow();
+    expect(async () => await db.del(1, 1)).rejects.toThrow();
   });
 });
