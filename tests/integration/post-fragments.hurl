@@ -1,0 +1,29 @@
+# Authenticated POST to /v1/fragments using Cognito JWT
+POST http://localhost:8080/v1/fragments
+Content-Type: text/plain; charset=utf-8
+Authorization: Bearer eyJraWQiOiIzdVpLVGl6anJQaEU2T1ZIYk9JUXMwXC80SXNnR2ZzUkNvOFJLaGx4Q29jdz0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiR3d5SFBScUFZaGIxVXRPcjROZGoyUSIsInN1YiI6IjQ0NDgyNGM4LWUwZDEtNzA4My02MjYyLTNhYTU3NzE0ZGFjMSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV8zYUJDTUhjalIiLCJjb2duaXRvOnVzZXJuYW1lIjoidXNlcjFAZW1haWwuY29tIiwib3JpZ2luX2p0aSI6IjBhNjljZGRhLTEwM2ItNGJiMy05NTgxLTY1MWIwYWU4M2NiNSIsImF1ZCI6IjRrczRnb3BqbDI3MzExNWlzMXJoNzZyNWJpIiwiZXZlbnRfaWQiOiIwM2I3ZDY3OS1mMWU3LTQ4NGQtYjEyZi1kYWE4MTZjZGExODMiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwMDUzNjk0MSwiZXhwIjoxNzAwNjIzMzQxLCJpYXQiOjE3MDA1MzY5NDEsImp0aSI6IjdiNWI2MDA3LTIxMDItNDJhZS05NTNjLTQ3MGI5M2ZjOGJmYSIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIn0.fSaT2LKjY-o1u5Ilvq2g3FWJuwLPEqqZsBucsS7nkE2CITCn9O8sWzdoqvgzLvRD6aa6Gzo50ZweNegkhYhgNYjvTH0DyYE_4HYhrDCNZP7Gf4UzqP34-rsDZdiw_rHV-J-JWUbPsg6okjyUD_pcFEIbKgMjxNxa8RM2YAOmjPgQrZjK_cNtxBjk6PEJXuVJ38U5bNO-D4tz6p2kp5G5Utw45s6dy1zn0221rkwIDnMd4ikiYKAeiTJo1UJM-WAnW-8i3r2XAIbkdfJ-iprT1Kr7TQipbGH730VC76RsqcbJdiG0j8KiIudqX2NZrKxnIAuVNLOnJfW1zlk3NTksiQ
+`This is a fragment!`
+
+# 1. We expect to get back an HTTP 201
+HTTP/1.1 201
+[Asserts]
+header "Location" matches "^(http:\/\/)?localhost:8080\/v1\/fragments\/[A-Za-z0-9_-]+$"
+jsonpath "$.status" == "ok"
+jsonpath "$.fragments.id" matches "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+jsonpath "$.fragments.ownerId" matches "^[0-9a-fA-F]+$"
+jsonpath "$.fragments.created" isString
+jsonpath "$.fragments.updated" isString
+jsonpath "$.fragments.type" == "text/plain; charset=utf-8"
+jsonpath "$.fragments.size" == 19
+[Captures]
+url: header "Location"
+
+# 2. Try to GET the fragment we just posted by its URL
+GET http://{{url}}
+Authorization: Bearer eyJraWQiOiIzdVpLVGl6anJQaEU2T1ZIYk9JUXMwXC80SXNnR2ZzUkNvOFJLaGx4Q29jdz0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiR3d5SFBScUFZaGIxVXRPcjROZGoyUSIsInN1YiI6IjQ0NDgyNGM4LWUwZDEtNzA4My02MjYyLTNhYTU3NzE0ZGFjMSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV8zYUJDTUhjalIiLCJjb2duaXRvOnVzZXJuYW1lIjoidXNlcjFAZW1haWwuY29tIiwib3JpZ2luX2p0aSI6IjBhNjljZGRhLTEwM2ItNGJiMy05NTgxLTY1MWIwYWU4M2NiNSIsImF1ZCI6IjRrczRnb3BqbDI3MzExNWlzMXJoNzZyNWJpIiwiZXZlbnRfaWQiOiIwM2I3ZDY3OS1mMWU3LTQ4NGQtYjEyZi1kYWE4MTZjZGExODMiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwMDUzNjk0MSwiZXhwIjoxNzAwNjIzMzQxLCJpYXQiOjE3MDA1MzY5NDEsImp0aSI6IjdiNWI2MDA3LTIxMDItNDJhZS05NTNjLTQ3MGI5M2ZjOGJmYSIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIn0.fSaT2LKjY-o1u5Ilvq2g3FWJuwLPEqqZsBucsS7nkE2CITCn9O8sWzdoqvgzLvRD6aa6Gzo50ZweNegkhYhgNYjvTH0DyYE_4HYhrDCNZP7Gf4UzqP34-rsDZdiw_rHV-J-JWUbPsg6okjyUD_pcFEIbKgMjxNxa8RM2YAOmjPgQrZjK_cNtxBjk6PEJXuVJ38U5bNO-D4tz6p2kp5G5Utw45s6dy1zn0221rkwIDnMd4ikiYKAeiTJo1UJM-WAnW-8i3r2XAIbkdfJ-iprT1Kr7TQipbGH730VC76RsqcbJdiG0j8KiIudqX2NZrKxnIAuVNLOnJfW1zlk3NTksiQ
+
+HTTP/1.1 200
+Content-Type: text/plain; charset=utf-8
+Content-Length: 19
+[Asserts]
+body == "This is a fragment!"

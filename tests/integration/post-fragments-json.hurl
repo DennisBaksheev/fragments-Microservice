@@ -1,0 +1,31 @@
+# 6. post-fragments-json.hurl
+# Confirm that posting a JSON fragment works, and doing a GET for the same fragment returns the expected result
+
+# Authenticated POST to /v1/fragments
+POST http://localhost:8080/v1/fragments
+Authorization: Bearer eyJraWQiOiIzdVpLVGl6anJQaEU2T1ZIYk9JUXMwXC80SXNnR2ZzUkNvOFJLaGx4Q29jdz0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiV19fdDl4MTdGcmdUMkhTZU5jRUFaZyIsInN1YiI6IjQ0NDgyNGM4LWUwZDEtNzA4My02MjYyLTNhYTU3NzE0ZGFjMSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV8zYUJDTUhjalIiLCJjb2duaXRvOnVzZXJuYW1lIjoidXNlcjFAZW1haWwuY29tIiwib3JpZ2luX2p0aSI6ImU5M2RmMjllLWJhY2YtNGM3OC04OWMzLWI5NGEyYWE2YzEzZSIsImF1ZCI6IjRrczRnb3BqbDI3MzExNWlzMXJoNzZyNWJpIiwiZXZlbnRfaWQiOiI1NjE2NjE1Ny01YTk4LTQ2OTItODhmOC1hZGJiZjI0NWU0NGYiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwMDM2Mzc5MCwiZXhwIjoxNzAwNDUwMTkwLCJpYXQiOjE3MDAzNjM3OTEsImp0aSI6ImM1YzM0MTJhLTNjNzktNDU0Yy04MjE3LWZmNzk5YmE4YzFiNSIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIn0.qWu6YWTxVfOZdAhMdIREItHMAPNy70nDGiGg2lFxmLMN3NhdStijw2YiDoLWrnkDSx5h-SMS7rB7Kkus2uRaPd6OFUmmflNSLIATEdSYGOBNdDlf2eE3fztloNU1fdvtJKmLuzmWLTFD_UysBIRDGcdMj8bJ2r5kG2gzsJgPrCH6vi0I0dsopFHXqaZc40g6YxBX4CUO5qIPS4dawq6zeQ6tLZTi59Mscg_P_ld7N1jd15P3Nsn0TrPLIOefGFmxGbsCHq_i1Ehn-eyBJ3hagXuQLJlt-G6ns6yWY7Jxq3Q4rGS9W8enfeThD9fcglE0Qx1b8CTGLl0Fst4q_tZnag
+Content-Type: application/json
+{"name": "David", "school": "Seneca"}
+
+HTTP/1.1 201
+[Asserts]
+header "Location" matches "^localhost:8080\/v1\/fragments\/[A-Za-z0-9_-]+$"
+jsonpath "$.status" == "ok"
+jsonpath "$.fragments.id" matches "^[A-Za-z0-9_-]+$"
+jsonpath "$.fragments.ownerId" matches "^[0-9a-fA-F]+$"
+jsonpath "$.fragments.created" isString
+jsonpath "$.fragments.updated" isString
+jsonpath "$.fragments.type" == "application/json"
+jsonpath "$.fragments.size" == 37
+[Captures]
+url: header "Location"
+
+# Try to GET the fragment we just posted by its URL
+# Prepend 'http://' to the captured URL
+GET http://{{url}}
+Authorization: Bearer eyJraWQiOiIzdVpLVGl6anJQaEU2T1ZIYk9JUXMwXC80SXNnR2ZzUkNvOFJLaGx4Q29jdz0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiR3d5SFBScUFZaGIxVXRPcjROZGoyUSIsInN1YiI6IjQ0NDgyNGM4LWUwZDEtNzA4My02MjYyLTNhYTU3NzE0ZGFjMSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV8zYUJDTUhjalIiLCJjb2duaXRvOnVzZXJuYW1lIjoidXNlcjFAZW1haWwuY29tIiwib3JpZ2luX2p0aSI6IjBhNjljZGRhLTEwM2ItNGJiMy05NTgxLTY1MWIwYWU4M2NiNSIsImF1ZCI6IjRrczRnb3BqbDI3MzExNWlzMXJoNzZyNWJpIiwiZXZlbnRfaWQiOiIwM2I3ZDY3OS1mMWU3LTQ4NGQtYjEyZi1kYWE4MTZjZGExODMiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwMDUzNjk0MSwiZXhwIjoxNzAwNjIzMzQxLCJpYXQiOjE3MDA1MzY5NDEsImp0aSI6IjdiNWI2MDA3LTIxMDItNDJhZS05NTNjLTQ3MGI5M2ZjOGJmYSIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIn0.fSaT2LKjY-o1u5Ilvq2g3FWJuwLPEqqZsBucsS7nkE2CITCn9O8sWzdoqvgzLvRD6aa6Gzo50ZweNegkhYhgNYjvTH0DyYE_4HYhrDCNZP7Gf4UzqP34-rsDZdiw_rHV-J-JWUbPsg6okjyUD_pcFEIbKgMjxNxa8RM2YAOmjPgQrZjK_cNtxBjk6PEJXuVJ38U5bNO-D4tz6p2kp5G5Utw45s6dy1zn0221rkwIDnMd4ikiYKAeiTJo1UJM-WAnW-8i3r2XAIbkdfJ-iprT1Kr7TQipbGH730VC76RsqcbJdiG0j8KiIudqX2NZrKxnIAuVNLOnJfW1zlk3NTksiQ
+
+HTTP/1.1 200
+[Asserts]
+header "Content-Type" matches "^application/json(;\\s*charset=utf-8)?$"
+header "Content-Length" == "37"
