@@ -1,0 +1,30 @@
+[33m43e5b7b[m[33m ([m[1;36mHEAD -> [m[1;32mnew-branch-name[m[33m, [m[1;31morigin/new-branch-name[m[33m)[m updates
+[33m82ab81c[m assignment 2 updates
+[33m4c30d30[m Release v0.7.0
+[33md8ff13b[m Update package.json
+[33m4d477e6[m Release v0.7.0
+[33m8ae3761[m lab 7 fixes
+[33m8ccd811[m Updating to version 0.7.0
+[33m8d8a95c[m Release v0.7.0
+[33mef892e2[m Revert to version 0.1.0
+[33md2a360e[m lab seven fix
+[33ma63ff77[m Release v0.7.0
+[33m868caba[m Release v0.8.0
+[33mcdeeecd[m Release v0.7.0
+[33m53e2384[m Release v0.8.0
+[33mdb341f9[m trying to fix
+[33m5944747[m Release v0.7.0
+[33m465597e[m Add continuous delivery workflow file
+[33m230a4b2[m Fixes for adding the Docker Hub build and push steps for lab seven
+[33m5c19cf2[m Fixed the adding Docker Hub build and push steps to GitHub Actions
+[33m8cbc207[m Added Docker Hub build and push steps to GitHub Actions and any other updates
+[33mc30bb39[m Added Docker Hub build and push steps to GitHub Actions
+[33m5c28607[m Add Dockerfile linting job to CI workflow
+[33m309a0ae[m Optimized Dockerfile with multi-stage build
+[33m31c7cc7[m Add Dockerfile and .dockerignore
+[33m5127b15[m My assignment one updates
+[33m19726ab[m[33m ([m[1;34mreplaced[m[33m)[m My assignment one updates
+[33mce39b5f[m My assignment one updates
+[33md297312[m Refactor to use response.js functions
+[33m482e721[m Added authentication middleware to /v1 routes.
+[33ma367d32[m Updated app.js and added routes
