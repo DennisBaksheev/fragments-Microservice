@@ -42,24 +42,23 @@ jobs:
           image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:${{ env.VERSION_TAG }}
           environment-variables: |
             LOG_LEVEL=info
-    NODE_ENV=production
-    AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
-    AWS_REGION=us-east-1
-    AWS_COGNITO_POOL_ID=us-east-1_3aBCMHcjR
-    API_URL=http://localhost:8080
-    PORT=8080
-    OAUTH_SIGN_IN_REDIRECT_URL=http://localhost:1234
-    AWS_COGNITO_HOSTED_UI_DOMAIN=https://dbaksheev-fragments.auth.us-east-1.amazoncognito.com
-    HTPASSWD_FILE=tests/.htpasswd
-    OAUTH_SIGN_OUT_REDIRECT_URL=http://localhost:1234
-    AWS_COGNITO_CLIENT_ID=4ks4gopjl273115is1rh76r5bi
-    AWS_S3_BUCKET_NAME=dbaksheev-fragments
-    AWS_S3_ENDPOINT_URL=http://localstack:4566
-    AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
-    AWS_DYNAMODB_TABLE_NAME=fragments
-
+            NODE_ENV=production
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
+            AWS_REGION=us-east-1
+            AWS_COGNITO_POOL_ID=us-east-1_3aBCMHcjR
+            API_URL=http://localhost:8080
+            PORT=8080
+            OAUTH_SIGN_IN_REDIRECT_URL=http://localhost:1234
+            AWS_COGNITO_HOSTED_UI_DOMAIN=https://dbaksheev-fragments.auth.us-east-1.amazoncognito.com
+            HTPASSWD_FILE=tests/.htpasswd
+            OAUTH_SIGN_OUT_REDIRECT_URL=http://localhost:1234
+            AWS_COGNITO_CLIENT_ID=4ks4gopjl273115is1rh76r5bi
+            AWS_S3_BUCKET_NAME=dbaksheev-fragments
+            AWS_S3_ENDPOINT_URL=http://localstack:4566
+            AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+            AWS_DYNAMODB_TABLE_NAME=fragments
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
