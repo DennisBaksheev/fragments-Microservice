@@ -1,12 +1,13 @@
-# 5. post-fragments-unauthenticated.hurl
-# Confirm that posting a fragment when not authenticated produces a 401 error
+# tests/integration/post-fragments.hurl
+# Authenticated POST to /v1/fragments
 POST http://localhost:8080/v1/fragments
-# wrong password
-Authorization: Basic wrongpassword==
-# We're sending a plain text fragment
-Content-Type: text/plain
+# We're sending a unsupported fragment
+Content-Type: some-type
+# Include HTTP Basic Auth credentials
+[BasicAuth]
+wrongemail@email.com:wrongpassword
 # Body of the request goes in ```...``` when it's a string
-```This is a fragment!```
+`This is a fragment!`
 
-# We expect to get back an HTTP 401
+# 1. We expect to get back an HTTP 401
 HTTP/1.1 401

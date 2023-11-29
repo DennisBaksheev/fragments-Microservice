@@ -2,17 +2,9 @@
 
 const express = require('express');
 // version and author from package.json
-//const { version, author } = require('../../package.json');
+const { version, author } = require('../../package.json');
+const { hostname } = require('os');
 
-<<<<<<< HEAD
-// Import the response handling functions
-//const { createSuccessResponse } = require('../response');
-
-// Import the authentication middleware
-const { authenticate } = require('../authorization');
-
-=======
->>>>>>> other-branch
 // Create a router that we can use to mount our API
 const router = express.Router();
 
@@ -38,8 +30,11 @@ router.get('/', (req, res) => {
   res.status(200).json({
     status: 'ok',
     author,
+    // Use your own GitHub URL for this...
     githubUrl: 'https://github.com/DennisBaksheev/fragments',
     version,
+    // Include the hostname in the response
+    hostname: hostname(),
   });
 });
 

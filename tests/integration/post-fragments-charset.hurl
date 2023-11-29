@@ -1,27 +1,43 @@
-# 4. post-fragments-charset.hurl
-# Confirm that posting a fragment Content-Type that includes a charset (e.g., text/plain; charset=utf-8) works, and is returned as the fragment's type when doing a GET
-
+# tests/integration/post-fragments.hurl
+# Authenticated POST to /v1/fragments
 POST http://localhost:8080/v1/fragments
-Authorization: Bearer eyJraWQiOiIzdVpLVGl6anJQaEU2T1ZIYk9JUXMwXC80SXNnR2ZzUkNvOFJLaGx4Q29jdz0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiRm9XdlU5QlZHRDZndERKem5ZQnRoZyIsInN1YiI6IjQ0NDgyNGM4LWUwZDEtNzA4My02MjYyLTNhYTU3NzE0ZGFjMSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV8zYUJDTUhjalIiLCJjb2duaXRvOnVzZXJuYW1lIjoidXNlcjFAZW1haWwuY29tIiwib3JpZ2luX2p0aSI6Ijk5MWQ5NTljLWE3MWQtNDIyMC05YWIyLTYwNzQxYTdjMDdiMSIsImF1ZCI6IjRrczRnb3BqbDI3MzExNWlzMXJoNzZyNWJpIiwiZXZlbnRfaWQiOiIyMDcxMDExOC04YTUwLTQ2ZDQtYmM2Yy02OTRiOWIxYTk1ZjciLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwMDUzNTAxMywiZXhwIjoxNzAwNjIxNDEzLCJpYXQiOjE3MDA1MzUwMTQsImp0aSI6ImZmM2Q0ZWNiLWU4YzQtNGZkZS05M2EzLWZlNTBhZGEwMDhkNSIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIn0.xe9kEtLHiCn4gVewna1qbOjg9phstbopOKibtXX_z6FBX32EHYBdDT-76TwpYpxN6HyM5ALN1eqhjKMybV0FNWBORppz4B1YUJCOCdqsBgC1JGGrGyh-GE10jkMlvKzw3kCrVZhX3sa6kwJXQgh_XOdTpjaMk17Hj3Xh5IMK4SkcTYKV1sbXLvQYiQCj9nD0viqFmGcDii7Yybtuvtnr0HBNMU3R6MaKPr-dhtF4BinMWgJnLv5Tpop_mKx3fIVxSq_EyFpnF0Vhc7JyMt6ha_Axhlz2HWjd-zy6OGZIIMPzRRpcDSfp51fIsK14wYbw4nojKI3g2L_KW-iTcasp7Q
+# We're sending a plain text fragment
+Content-Type: text/plain; charset=utf-8
+# Include HTTP Basic Auth credentials
+[BasicAuth]
+user1@email.com:Dennis123!
+# Body of the request goes in ```...``` when it's a string
 `This is a fragment!`
 
+# 1. We expect to get back an HTTP 201
 HTTP/1.1 201
+# We have various assertions about the response that we want to check
 [Asserts]
-header "Location" matches "^(http:\/\/)?localhost:8080\/v1\/fragments\/[A-Za-z0-9_-]+$"
-# Update the jsonpath assertions according to your actual response structure
-jsonpath "$.fragments.id" matches "^[A-Za-z0-9_-]+$"
+# The Location header should look like what we expect (including the fragment id)
+header "Location" matches "^http:\/\/localhost:8080\/v1\/fragments\/[A-Za-z0-9_-]+$"
+jsonpath "$.status" == "ok"
+# Our fragment ids use UUIDs, see https://ihateregex.io/expr/uuid/
+jsonpath "$.fragments.id" matches "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+# Our ownerId hash is a hex encoded string
 jsonpath "$.fragments.ownerId" matches "^[0-9a-fA-F]+$"
+# Basic check for the presence of created and updated date strings.
+# You could also write a regex for this and use matches
 jsonpath "$.fragments.created" isString
 jsonpath "$.fragments.updated" isString
 jsonpath "$.fragments.type" == "text/plain; charset=utf-8"
+# 19 is the length of our fragment data: 'This is a fragment!'
 jsonpath "$.fragments.size" == 19
+# Capture the Location URL into a variable named `url`
 [Captures]
 url: header "Location"
 
-# Now, GET the fragment we just posted by its URL
-GET http://{{url}}
-Authorization: Bearer eyJraWQiOiIzdVpLVGl6anJQaEU2T1ZIYk9JUXMwXC80SXNnR2ZzUkNvOFJLaGx4Q29jdz0iLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiRm9XdlU5QlZHRDZndERKem5ZQnRoZyIsInN1YiI6IjQ0NDgyNGM4LWUwZDEtNzA4My02MjYyLTNhYTU3NzE0ZGFjMSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV8zYUJDTUhjalIiLCJjb2duaXRvOnVzZXJuYW1lIjoidXNlcjFAZW1haWwuY29tIiwib3JpZ2luX2p0aSI6Ijk5MWQ5NTljLWE3MWQtNDIyMC05YWIyLTYwNzQxYTdjMDdiMSIsImF1ZCI6IjRrczRnb3BqbDI3MzExNWlzMXJoNzZyNWJpIiwiZXZlbnRfaWQiOiIyMDcxMDExOC04YTUwLTQ2ZDQtYmM2Yy02OTRiOWIxYTk1ZjciLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwMDUzNTAxMywiZXhwIjoxNzAwNjIxNDEzLCJpYXQiOjE3MDA1MzUwMTQsImp0aSI6ImZmM2Q0ZWNiLWU4YzQtNGZkZS05M2EzLWZlNTBhZGEwMDhkNSIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIn0.xe9kEtLHiCn4gVewna1qbOjg9phstbopOKibtXX_z6FBX32EHYBdDT-76TwpYpxN6HyM5ALN1eqhjKMybV0FNWBORppz4B1YUJCOCdqsBgC1JGGrGyh-GE10jkMlvKzw3kCrVZhX3sa6kwJXQgh_XOdTpjaMk17Hj3Xh5IMK4SkcTYKV1sbXLvQYiQCj9nD0viqFmGcDii7Yybtuvtnr0HBNMU3R6MaKPr-dhtF4BinMWgJnLv5Tpop_mKx3fIVxSq_EyFpnF0Vhc7JyMt6ha_Axhlz2HWjd-zy6OGZIIMPzRRpcDSfp51fIsK14wYbw4nojKI3g2L_KW-iTcasp7Q
+# 2. Try to GET the fragment we just posted by its URL
+GET {{url}}
+[BasicAuth]
+user1@email.com:Dennis123!
 
 HTTP/1.1 200
+Content-Type: text/plain 
+Content-Length: 19
 [Asserts]
-header "Content-Type" == "text/plain; charset=utf-8"
+body == "This is a fragment!"

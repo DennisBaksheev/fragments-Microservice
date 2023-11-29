@@ -1,37 +1,45 @@
-const logger = require('../../logger');
-
-//const apiUrl = process.env.API_URL || 'http://localhost:8080';
-
-const { createSuccessResponse, createErrorResponse } = require('../../response');
-//const { listFragments, readFragment, writeFragment } = require('../../model/data/memory/index');
+// Use crypto.randomUUID() to create unique IDs, see:
+// https://nodejs.org/api/crypto.html#cryptorandomuuidoptions
+const crypto = require('crypto');
 const { Fragment } = require('../../Model/fragment');
-/**
- * Post a fragment for the current user
- */
+
+const createSuccessResponse = require('../../response').createSuccessResponse;
+const createErrorResponse = require('../../response').createErrorResponse;
+
+const generateUUID = () => {
+  return crypto.randomUUID().toString('hex');
+};
+
 module.exports = async (req, res) => {
-  logger.debug({ user: req.user });
-  logger.debug({ body: req.body });
+  console.log(Buffer.isBuffer(req.body) + ' | ' + req.headers['content-type']);
+  console.log(Buffer.isBuffer(req.body) && Fragment.isSupportedType(req.headers['content-type']));
+  if (Buffer.isBuffer(req.body) && Fragment.isSupportedType(req.headers['content-type'])) {
+    const id = generateUUID();
+    const location = req.protocol + '://' + req.hostname + ':8080/v1' + req.url + '/' + id;
+    res.set({ Location: location });
 
-  const contentType = req.headers['content-type'];
+    const newFragment = new Fragment({
+      id: id,
+      ownerId: crypto.createHash('sha256').update(req.user).digest('hex'),
+      created: new Date().toString(),
+      update: new Date().toString(),
+      type: req.headers['content-type'],
+      size: Number(req.headers['content-length']),
+    });
+    await newFragment.setData(req.body);
 
-  //if (contentType.includes('text') || contentType === 'application/json')
-  if (Fragment.isSupportedType(contentType)) {
-    const fragment = new Fragment({ ownerId: req.user, type: contentType, size: 0 });
-    try {
-      await fragment.save();
-      await fragment.setData(req.body);
-    } catch (err) {
-      logger.error({ err }, 'error on post');
-    }
-    /* const st = await fragment.getData();
-    console.log(st.toString()); */
-    res.set('Location', `${req.headers.host}/v1/fragments/${fragment.id}`);
-    let msg = {
-      fragments: fragment,
-    };
-    let message = createSuccessResponse(msg);
-    res.status(201).json(message);
+    createSuccessResponse(
+      res.status(201).json({
+        status: 'ok',
+        fragments: newFragment,
+      })
+    );
   } else {
-    res.status(415).json(createErrorResponse(415, 'Unsupported Media Type'));
+    createErrorResponse(
+      res.status(415).json({
+        status: 'error',
+        message: 'Invalid file type',
+      })
+    );
   }
 };

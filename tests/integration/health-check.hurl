@@ -10,9 +10,10 @@ Cache-Control: no-cache
 [Asserts]
 # We expect to get back a JSON response with { "status": "ok", ... }
 jsonpath "$.status" == "ok"
-# We expect to get back a JSON response with { ..., "author": "Dennis Baksheev" }
+# We expect to get back a JSON response with { ..., "author": "..." }
 jsonpath "$.author" isString
-# We expect to get back a JSON response with { ..., "githubUrl": "https://github.com/DennisBaksheev/fragments" }
+# We expect to get back a JSON response with { ..., "githubUrl": "..." }
 jsonpath "$.githubUrl" matches /^https:\/\/github.com\/.+/
-# We expect to get back a JSON response with { ..., "version": "0.5.3" }
+# We expect to get back a JSON response with { ..., "version": "x.y.z" }
 jsonpath "$.version" matches /^\d+\.\d+\.\d+$/
+
