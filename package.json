@@ -1,6 +1,6 @@
 {
   "name": "fragments",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "private": true,
   "description": "CCP555 fragments back-end API",
   "main": "index.js",
