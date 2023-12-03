@@ -1,20 +1,8 @@
-const MemoryDB = require('../memory/memory-db'); // Updated require path
 const s3Client = require('./s3Client');
+const ddbDocClient = require('./ddbDocClient');
+const { PutCommand, GetCommand, QueryCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-const logger = require('../../../logger'); // Assuming logger is in this path
-
-// Create two in-memory databases: one for fragment metadata and the other for raw data
-const metadata = new MemoryDB();
-
-// Write a fragment's metadata to memory db. Returns a Promise
-function writeFragment(fragment) {
-  return metadata.put(fragment.ownerId, fragment.id, fragment);
-}
-
-// Read a fragment's metadata from memory db. Returns a Promise
-function readFragment(ownerId, id) {
-  return metadata.get(ownerId, id);
-}
+const logger = require('../../../logger');
 
 // Convert a stream of data into a Buffer
 const streamToBuffer = (stream) =>
@@ -24,6 +12,39 @@ const streamToBuffer = (stream) =>
     stream.on('error', reject);
     stream.on('end', () => resolve(Buffer.concat(chunks)));
   });
+
+// Writes a fragment to DynamoDB. Returns a Promise.
+function writeFragment(fragment) {
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    Item: fragment,
+  };
+  const command = new PutCommand(params);
+
+  try {
+    return ddbDocClient.send(command);
+  } catch (err) {
+    logger.warn({ err, params, fragment }, 'error writing fragment to DynamoDB');
+    throw err;
+  }
+}
+
+// Reads a fragment from DynamoDB. Returns a Promise<fragment|undefined>
+async function readFragment(ownerId, id) {
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    Key: { ownerId, id },
+  };
+  const command = new GetCommand(params);
+
+  try {
+    const data = await ddbDocClient.send(command);
+    return data?.Item;
+  } catch (err) {
+    logger.warn({ err, params }, 'error reading fragment from DynamoDB');
+    throw err;
+  }
+}
 
 // Write a fragment's data to an S3 Object in a Bucket
 async function writeFragmentData(ownerId, id, data) {
@@ -63,7 +84,7 @@ async function readFragmentData(ownerId, id) {
   }
 }
 
-// Delete a fragment's data from S3 and its metadata from memory db
+// Delete a fragment's data from S3 and its metadata from DynamoDB
 async function deleteFragment(ownerId, id) {
   const deleteData = async () => {
     const params = {
@@ -82,18 +103,48 @@ async function deleteFragment(ownerId, id) {
     }
   };
 
-  return Promise.all([metadata.del(ownerId, id), deleteData()]);
+  const deleteMetadata = async () => {
+    const params = {
+      TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+      Key: { ownerId, id },
+    };
+    const command = new DeleteCommand(params);
+
+    try {
+      await ddbDocClient.send(command);
+    } catch (err) {
+      logger.error({ err, params }, 'Error deleting fragment metadata from DynamoDB');
+      throw new Error('unable to delete fragment metadata');
+    }
+  };
+
+  return Promise.all([deleteMetadata(), deleteData()]);
 }
 
-// Get a list of fragment ids/objects for the given user from memory db. Returns a Promise
+// Get a list of fragments, either ids-only, or full Objects, for the given user.
+// Returns a Promise<Array<Fragment>|Array<string>|undefined>
 async function listFragments(ownerId, expand = false) {
-  const fragments = await metadata.query(ownerId);
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    KeyConditionExpression: 'ownerId = :ownerId',
+    ExpressionAttributeValues: {
+      ':ownerId': ownerId,
+    },
+  };
 
-  if (expand || !fragments) {
-    return fragments;
+  if (!expand) {
+    params.ProjectionExpression = 'id';
   }
 
-  return fragments.map((fragment) => fragment.id);
+  const command = new QueryCommand(params);
+
+  try {
+    const data = await ddbDocClient.send(command);
+    return !expand ? data?.Items.map((item) => item.id) : data?.Items;
+  } catch (err) {
+    logger.error({ err, params }, 'error getting all fragments for user from DynamoDB');
+    throw err;
+  }
 }
 
 module.exports.listFragments = listFragments;
