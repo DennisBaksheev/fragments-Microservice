@@ -62,6 +62,8 @@ jobs:
         run: chmod +x ./scripts/local-aws-setup.sh
       - name: Setup Local AWS Resources
         run: ./scripts/local-aws-setup.sh
+      - name: Start Fragments Server
+        run: npm start &
       - name: Run Hurl Tests
         run: npm run test:integration
 
