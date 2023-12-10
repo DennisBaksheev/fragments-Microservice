@@ -6,10 +6,6 @@ const { Fragment } = require('../../Model/fragment');
 const createSuccessResponse = require('../../response').createSuccessResponse;
 const createErrorResponse = require('../../response').createErrorResponse;
 
-const generateUUID = () => {
-  return crypto.randomUUID().toString('hex');
-};
-
 module.exports = async (req, res) => {
   const id = req.params.id;
   let user = crypto.createHash('sha256').update(req.user).digest('hex');
@@ -18,50 +14,39 @@ module.exports = async (req, res) => {
   if (idList.includes(id)) {
     const fragment = await Fragment.byId(user, id);
     if (fragment) {
-      if (fragment.mimeType == req.headers['content-type']) {
-        if (Buffer.isBuffer(req.body) && Fragment.isSupportedType(req.headers['content-type'])) {
-          const id = generateUUID();
-          const location = req.protocol + '://' + req.hostname + ':8080/v1' + req.url + '/' + id;
-          res.set({ Location: location });
+      // Check if the new content type is supported
+      if (Buffer.isBuffer(req.body) && Fragment.isSupportedType(req.headers['content-type'])) {
+        // Update the fragment's data and mimeType
+        await fragment.setData(req.body);
+        fragment.mimeType = req.headers['content-type']; // Update the mimeType
 
-          await fragment.setData(req.body);
-
-          createSuccessResponse(
-            res.status(200).json({
-              status: 'ok',
-              fragments: fragment,
-            })
-          );
-        } else {
-          createErrorResponse(
-            res.status(415).json({
-              status: 'error',
-              message: 'Invalid file type or body empty',
-            })
-          );
-        }
+        createSuccessResponse(
+          res.status(200).json({
+            status: 'ok',
+            fragment: fragment,
+          })
+        );
       } else {
         createErrorResponse(
-          res.status(400).json({
+          res.status(415).json({
             status: 'error',
-            message: 'Type not match with old type',
+            message: 'Invalid file type or body empty',
           })
         );
       }
     } else {
       createErrorResponse(
-        res.status(415).json({
+        res.status(404).json({
           status: 'error',
-          message: 'fragment empty...',
+          message: 'Fragment not found',
         })
       );
     }
   } else {
-    const error = 'Id is not exist by user ' + user + '.';
     createErrorResponse(
-      res.status(415).json({
-        code: 415,
-        message: error,
+      res.status(404).json({
+        status: 'error',
+        message: 'Fragment ID does not exist for user',
       })
     );
   }
