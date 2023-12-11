@@ -38,6 +38,7 @@
     "@aws-sdk/client-dynamodb": "^3.465.0",
     "@aws-sdk/client-s3": "^3.462.0",
     "@aws-sdk/lib-dynamodb": "^3.465.0",
+    "@img/sharp-win32-x64": "^0.33.0",
     "aws-jwt-verify": "^3.3.0",
     "body-parser": "^1.20.1",
     "compression": "^1.7.4",
@@ -47,6 +48,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "helmet": "^6.0.1",
+    "html-to-text": "^9.0.5",
     "http-auth": "^4.2.0",
     "http-auth-passport": "^1.0.7",
     "markdown-it": "^13.0.2",
@@ -57,6 +59,7 @@
     "pino": "^8.8.0",
     "pino-http": "^8.3.1",
     "pino-pretty": "^9.1.1",
+    "sharp": "^0.33.0",
     "stoppable": "^1.1.0"
   }
 }
