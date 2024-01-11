@@ -1,47 +1,35 @@
-CCP555 Fragments - Development and Running Guide - Dennis Baksheev
+# Fragments Microservice
 
-Introduction
+## Overview
+The Fragments Microservice is a cloud-based solution designed to manage and process small fragments of text or images, catering to a diverse array of formats. This microservice seamlessly integrates with various systems, handling data from IoT devices, factory workers' mobile apps, and automated cameras in assembly lines.
 
-This server is a part of my Fragments project. Below you'll find instructions on how to use the various scripts created to streamline development.
+## Key Features
+- **CRUD Operations**: Create, retrieve, update, and delete functionalities for text and image fragments.
+- **Data Conversion**: Convert fragment data between different formats, like Markdown to HTML or JPEG to PNG.
+- **Secure and Isolated Data**: All operations require authorization, ensuring data privacy and security.
+- **Scalability**: Designed to handle massive data storage needs.
+- **Cloud Deployment**: Deployed on AWS for high availability and performance.
 
-Scripts
-The following scripts have been provided in the package.json to ease the development and running processes:
+## API Version
+The API endpoints begin with `/v1/*`, offering flexibility for future updates while maintaining support for older versions.
 
-1. Linting
-   To ensure that the code follows consistent styling and has no obvious issues, we use ESLint.
+## Authentication
+Supports Basic HTTP credentials or JSON Web Tokens (JWT) for secure access to the API.
 
-Script:
+## API Endpoints
+- **Health Check**: An unauthenticated route for service health verification.
+- **POST /fragments**: Create new fragments.
+- **GET /fragments**: Retrieve all fragments for the authenticated user.
+- **PUT /fragments/:id**: Update existing fragments.
+- **DELETE /fragments/:id**: Delete a fragment.
 
-npm run lint
-This script will lint all JS files within the src directory using the provided .eslintrc.js configuration.
+## Technologies
+- **AWS**: Leveraging various AWS services for storage, authentication, and deployment.
+- **Docker Compose**: For running containers in development and CI workflows.
+- **GitHub Actions**: Automated CI/CD workflows for building, testing, and deploying.
 
-2. Starting the Server
-   To simply start the server without any development mode features:
+## Repository Link
+- [Docker Hub Repository](https://hub.docker.com/r/dennisbaksheev1/fragments)
 
-Script:
-
-npm start
-This will start the server using Node.js.
-
-3. Development Mode
-   For active development, it's beneficial to have the server automatically restart upon code changes.
-
-Script:
-
-npm run dev
-This uses nodemon to watch the files in the src directory and restart the server upon any changes.
-
-4. Debugging
-   If you need to connect a debugger and have it pause execution on set breakpoints:
-
-Script:
-
-npm run debug
-This command starts the server with Node's inspector active. Use tools like Chrome DevTools or VSCode's debugger to attach to this process.
-
-5. Testing
-
-Script:
-
-npm test
-This will currently echo a message indicating that no tests have been specified.
+## Deployment
+The microservice is deployed to AWS Elastic Container Service, accessible via load balancer URL http://myloadbalancer-595404775.us-east-1.elb.amazonaws.com/.
