@@ -32,18 +32,15 @@ Supports Basic HTTP credentials or JSON Web Tokens (JWT) for secure access to th
 - [Docker Hub Repository](https://hub.docker.com/r/dennisbaksheev1/fragments)
 - [Fragments UI Repository](https://github.com/DennisBaksheev/fragments-ui)
 
-## Deployment
-Access the Fragments Microservice via the AWS Load Balancer: [AWS Load Balancer URL](http://myloadbalancer-595404775.us-east-1.elb.amazonaws.com/)
-
 ### Front-End Integration
 
 The Fragments Microservice is designed to work seamlessly with the Fragments UI front-end. The following integrations were implemented for a cohesive user experience:
 
-1. **AWS Load Balancer Configuration**: Configured the AWS Load Balancer to handle requests from the front-end hosted on Netlify.
+1. **AWS Load Balancer Configuration**: Configured the AWS Load Balancer to handle requests from the front-end.
 
-2. **API Security**: Ensured that all API endpoints require proper authentication and are capable of handling requests from the Netlify-hosted front-end.
+2. **API Security**: Ensured that all API endpoints require proper authentication and are capable of handling requests from the front-end.
 
-3. **Deployment Strategy**: The microservice is deployed to AWS Elastic Container Service, with configurations to support requests from the Netlify front-end.
+3. **Deployment Strategy**: The microservice is deployed to AWS Elastic Container Service, with configurations to support requests from the front-end.
 
 
 
